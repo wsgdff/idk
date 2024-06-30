@@ -1,0 +1,44 @@
+public class MyFIRSTJavaOpMode extends LinearOpMode {
+    DcMotor motorLeft;
+    DcMotor motorRight;
+    DcMotor frontLeft;
+    DcMotor frontRight;
+    ColorSensor color1;
+    DistanceSensor distance1;
+    BNO055IMU imu;
+@Override
+    public void runOpMode() {
+      motorLeft = hardwareMap.get(DcMotor.class, "motorLeft");
+      motorRight = hardwareMap.get(DcMotor.class, "motorRight");
+      frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+      frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+      color1 = hardwareMap.get(ColorSensor.class, "color1");
+      distance1 = hardwareMap.get(DistanceSensor.class, "distance1");
+      imu = hardwareMap.get(BNO055IMU.class, "imu");
+      waitForStart();
+    //   while (opModeIsActive()) {
+    //       frontLeft.setPower(1);
+    //       frontRight.setPower(1);
+    //       motorLeft.setPower(-1);
+    //       motorRight.setPower(1);
+    //       sleep(1200);
+    //       frontLeft.setPower(-1);
+    //       frontRight.setPower(-1);
+    //       motorLeft.setPower(-1);
+    //       motorRight.setPower(-1);
+    //       sleep(400);
+         for(int x=0;x<=3;x++){
+        frontLeft.setPower(1);
+          frontRight.setPower(1);
+          motorLeft.setPower(-1);
+          motorRight.setPower(1);
+          sleep(1200);
+          frontLeft.setPower(-1);
+          frontRight.setPower(-1);
+          motorLeft.setPower(-1);
+          motorRight.setPower(-1);
+          sleep(450);
+        }
+    }
+   
+}
