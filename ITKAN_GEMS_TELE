@@ -1,0 +1,252 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.Gamepad;
+
+@TeleOp
+public class ITKAN_GEMS_TELEOP extends LinearOpMode {
+    private DcMotor backLeft;
+    private DcMotor backRight;
+    private DcMotor frontLeft;
+    private DcMotor frontRight;
+    private DcMotor armMotor;
+    private Servo claw;
+    private Servo intake;
+    private Servo armServo;
+    private int armTarget = 0;
+    double joystick;
+    boolean isPressed;
+    boolean isDown = true;
+    boolean lastCycle = false, currCycle = false;
+    double intakePosition = 0.5; // Default intake position
+    int maxArmPosition = 2500;
+    int minArmPosition = 0;
+    
+    int armPosition = 0;
+    int armMoveLength = 100;
+    
+    double maxintakePosition = 1;
+    double minintakePosition = 0.50;
+    double intakeMoveLength = 0.1;
+    
+    boolean isopModeValueCalculated = false;
+
+    double strafemulti;
+    double forwardmulti;
+    double turnmulti;
+    
+    @Override
+    public void runOpMode()  {
+        // Initialize hardware
+        backLeft = hardwareMap.get(DcMotor.class, "bl");
+        backRight = hardwareMap.get(DcMotor.class, "br");
+        frontLeft = hardwareMap.get(DcMotor.class, "fl");
+        frontRight = hardwareMap.get(DcMotor.class, "fr");
+        armMotor = hardwareMap.get(DcMotor.class, "leftarm");
+        claw = hardwareMap.get(Servo.class, "claw");
+        intake = hardwareMap.get(Servo.class, "intake");
+           
+
+        // Set motor directions
+        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        armMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Set zero power behavior
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        //armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+       // armMotor.setTargetPosition(0);
+        //armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //armMotor.setPower(0.5);
+
+        //Set initial position of the arm
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armMotor.setTargetPosition(0);
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setPower(0.5);
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //double basepower = 0.7;
+        double lefty, leftx, rightx;
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+            // Arm control
+            if (gamepad2.right_bumper) { //Gamepad 2 right bumper is used for home (0) position for the arm and wrist
+                 intake.setPosition(0);
+                 move_arm(0); 
+                 claw.setPosition(0.8);
+            } else if (gamepad2.x) { // Gamepad 2 X button is used for the intake grab Position of the arm and wrist
+                intake.setPosition(1); 
+                claw.setPosition(0); 
+                move_arm(-2690);
+                intake.setPosition(1); // grab position
+            } else if (gamepad2.a) { // Gamepad 2 A button is used for scoring position of the arm and wrist
+                move_arm(-980);
+                intake.setPosition(1);
+            } else if (gamepad2.y) { // Gamepad 2 Y button is used for the drive Position of the arm and wrist
+                move_arm(-2400); // drive position // 600
+                intake.setPosition(0.5);
+                //claw.setPosition(0);
+            }
+        //***********This section is for intake positions through dpad on gamepad 2**************/
+   if (gamepad1.dpad_down) {
+                 arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                 arm.setPower(0.5); // Move up
+                 targetPosition = arm.getCurrentPosition(); // Update target position
+                 telemetry.addLine("Manual Move Up");
+            else if (gamepad1.dpad_up) {
+                 arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                 arm.setPower(-0.5); // Move down
+                 targetPosition = arm.getCurrentPosition(); // Update target position
+                 telemetry.addLine("Manual Move Down");
+           }
+         else{
+          arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+          arm.setTargetPosition(targetPosition);
+         }
+
+
+            else if (gamepad2.dpad_up) { // Specimen In position
+                if (armPosition > minArmPosition) {
+                    if ( isopModeValueCalculated == false) {
+                    armPosition =  -( armMotor.getCurrentPosition());
+                    armPosition = armPosition - armMoveLength;
+                    telemetry.addData("Arm Free Position", armPosition);
+                     isopModeValueCalculated = true;
+                    }
+                }
+                move_arm(-armPosition); 
+            }
+            else if (gamepad2.dpad_down) { // Specimen In position
+                if (armPosition < maxArmPosition) {
+                    if ( isopModeValueCalculated == false) {
+                    armPosition =  -( armMotor.getCurrentPosition());
+                    armPosition = armPosition + armMoveLength;
+                    telemetry.addData("Arm Free Position", armPosition);
+                     isopModeValueCalculated = true;
+                    }
+                }
+                move_arm(-armPosition); 
+            }
+            else if (gamepad2.dpad_right) { //intake vertical
+                   double lrintakepos = intake.getPosition();
+                   if (lrintakepos < maxintakePosition) {
+                       if ( isopModeValueCalculated == false) {
+                        lrintakepos = lrintakepos + intakeMoveLength;
+                        isopModeValueCalculated = true;
+                        move_wrist(lrintakepos);
+                       }
+                   }
+                   
+                } else if (gamepad2.dpad_left) { //intake vertical
+                   double llintakepos = intake.getPosition();
+                   if (llintakepos > minintakePosition) {
+                       if ( isopModeValueCalculated == false) {
+                        llintakepos = llintakepos - intakeMoveLength;
+                        isopModeValueCalculated = true;
+                        move_wrist(llintakepos);
+                       }
+                   }
+               
+            }else {
+
+                 isopModeValueCalculated = false;
+            }
+           //***********This section is for intake positions through dpad on gamepad 2**************/
+
+            // Base movement logic
+            double leftx = (gamepad1.left_stick_x);// Gamepad 1 left stick X is used for strafe left and right
+            double lefty = (gamepad1.left_stick_y + gamepad1.right_stick_y); // Gamepad 1 left stick Y and right stick Y are used for forward and backward positions of the wheels
+            double rightx = (gamepad1.right_stick_x); // Gamepad 1 right stick X is used to turn left and right
+
+            frontLeft.setPower(lefty- leftx - rightx);
+            frontRight.setPower(lefty + leftx + rightx);
+            backLeft.setPower(lefty + leftx - rightx);
+            backRight.setPower(lefty - leftx + rightx);
+
+            //***********This section is commented out**************/
+            // Gamepad 1 control inputs
+            /*lefty1 = gamepad1.left_stick_y; // Gamepad 1 left stick Y is used for forward and backward positions of the wheels
+            leftx1 = gamepad1.left_stick_x; // Gamepad 1 left stick X is used for strafe left and right
+            rightx1 = gamepad1.right_stick_x; // Gamepad 1 right stick X is used to turn left and right
+            */
+
+            // Base movement logic
+            /*if (gamepad1.right_bumper) {//Gamepad 1 right bumper is used for reducing the speed of the motors
+                basepower = 0.5; // Low speed mode
+            } else {
+                basepower = 0.7; // Full power driving
+            }
+
+            frontLeft.setPower((basepower * -lefty1) + (basepower * leftx1) + basepower * rightx1);
+            backRight.setPower((basepower * lefty1) - (basepower * leftx1) + basepower * rightx1);
+            frontRight.setPower((basepower * lefty1) + (basepower * leftx1) + basepower * rightx1);
+            backLeft.setPower((basepower * lefty1) - (basepower * leftx1) + basepower * -rightx1);*/
+            
+            
+            //***********This section is commented out**************/
+
+            // Claw control 
+            lastCycle = currCycle;
+            currCycle = gamepad2.b; //Gamepad 2 B button is used for open and closing the claw
+            telemetry.addData("Claw Last", lastCycle);
+            telemetry.addData("Claw", currCycle);
+            if (currCycle && !lastCycle) {
+                isDown = !isDown;
+                if (isDown) {
+                    claw.setPosition(0.1);  
+                } else {
+                    claw.setPosition(0.8);
+                }
+            }
+
+            // Intake control 
+            //***********This section is for wrist positions through dpad on gamepad 1**************/
+            if (gamepad1.dpad_up) {
+                move_wrist("home");
+            }  if (gamepad1.dpad_down) {
+                move_wrist("back");
+            } else if (gamepad1.dpad_left) {
+                move_wrist("grab");
+            } else if (gamepad1.dpad_right) {
+                move_wrist("bucket");
+            }
+            //***********This section is for wrist positions through dpad on gamepad 1**************/
+            // Send telemetry data
+            telemetry.addData("Arm Position", armMotor.getCurrentPosition());
+            telemetry.addData("Wrist Position", intake.getPosition());
+            telemetry.addData("Arm Target Position", armTarget);
+            telemetry.addData("Base Power", basepower);
+            telemetry.addData("Low Power Mode", gamepad1.right_bumper);
+            telemetry.update();
+        }
+    }
+
+    public void move_wrist(double pos) {
+        if( pos >= minintakePosition && pos <=maxintakePosition) {
+            intake.setPosition(pos);
+         
+        }
+    }
+
+  public void move_arm(int armTarget) {
+    armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    armMotor.setTargetPosition(armTarget);
+    armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    armMotor.setPower(0.5);
+  } 
+}
