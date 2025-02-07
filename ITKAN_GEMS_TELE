@@ -103,12 +103,13 @@ public class ITKAN_GEMS_TELEOP extends LinearOpMode {
                 //claw.setPosition(0);
             }
         //***********This section is for intake positions through dpad on gamepad 2**************/
-   if (gamepad1.dpad_down) {
+               if (gamepad2.dpad_up) {
                  arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                  arm.setPower(0.5); // Move up
                  targetPosition = arm.getCurrentPosition(); // Update target position
                  telemetry.addLine("Manual Move Up");
-            else if (gamepad1.dpad_up) {
+                 }          
+                    else if (gamepad2.dpad_down) {
                  arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                  arm.setPower(-0.5); // Move down
                  targetPosition = arm.getCurrentPosition(); // Update target position
@@ -120,7 +121,7 @@ public class ITKAN_GEMS_TELEOP extends LinearOpMode {
          }
 
 
-            else if (gamepad2.dpad_up) { // Specimen In position
+            /*else if (gamepad2.dpad_up) { // Specimen In position
                 if (armPosition > minArmPosition) {
                     if ( isopModeValueCalculated == false) {
                     armPosition =  -( armMotor.getCurrentPosition());
@@ -141,8 +142,8 @@ public class ITKAN_GEMS_TELEOP extends LinearOpMode {
                     }
                 }
                 move_arm(-armPosition); 
-            }
-            else if (gamepad2.dpad_right) { //intake vertical
+            }*/
+           if (gamepad2.dpad_right) { //intake vertical
                    double lrintakepos = intake.getPosition();
                    if (lrintakepos < maxintakePosition) {
                        if ( isopModeValueCalculated == false) {
