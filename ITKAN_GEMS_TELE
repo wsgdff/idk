@@ -121,24 +121,20 @@ public class ITKAN_GEMS_TELEOP extends LinearOpMode {
          }
 
 
-            /*else if (gamepad2.dpad_up) { // Specimen In position
-                if (armPosition > minArmPosition) {
-                    if ( isopModeValueCalculated == false) {
-                    armPosition =  -( armMotor.getCurrentPosition());
-                    armPosition = armPosition - armMoveLength;
-                    telemetry.addData("Arm Free Position", armPosition);
-                     isopModeValueCalculated = true;
+             if (gamepad1.dpad_up) {
+                 arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                 arm.setPower(-0.5); // Move down
+                 targetPosition = arm.getCurrentPosition(); // Update target position
+                 telemetry.addLine("Manual Move Down");
                     }
                 }
                 move_arm(-armPosition); 
             }
-            else if (gamepad2.dpad_down) { // Specimen In position
-                if (armPosition < maxArmPosition) {
-                    if ( isopModeValueCalculated == false) {
-                    armPosition =  -( armMotor.getCurrentPosition());
-                    armPosition = armPosition + armMoveLength;
-                    telemetry.addData("Arm Free Position", armPosition);
-                     isopModeValueCalculated = true;
+            else if (gamepad1.dpad_down) {
+                 arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                 arm.setPower(0.5); // Move up
+                 targetPosition = arm.getCurrentPosition(); // Update target position
+                 telemetry.addLine("Manual Move Up");
                     }
                 }
                 move_arm(-armPosition); 
